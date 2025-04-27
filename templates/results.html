@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepSearch - Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="../static/results.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
+    <!-- ============Favicon==================== -->
+    <link rel="apple-touch-icon" sizes="180x180" href="../static/Resources/favicon_io/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../static/Resources/favicon_io/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../static/Resources/favicon_io/favicon-16x16.png" />
+    <!-- Link to Android Chrome icons -->
+    <link rel="icon" type="image/png" sizes="192x192"
+        href="../static/Resources/favicon_io/android-chrome-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512"
+        href="../static/Resources/favicon_io/android-chrome-512x512.png" />
+
+    <link rel="manifest" href="../static/Resources/favicon_io/site.webmanifest" />
+
+</head>
+
+<body>
+    <!-- =======================================================================================NAVIGATION======================== -->
+
+    <nav class="navbar navbar-expand-lg bg-black">
+        <div class="container-fluid">
+            <a class="navbar-brand logo" href="/">DeepSearch</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Contact Us</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <form action="/update" method="POST">
+            <div class="row">
+                <div class="col-md-5">
+                    <h1>Closest Class - <span class="cls-name">{{ class_name }}</span></h1>
+                </div>
+                <div class="col-md-3 mt-2">
+                    <label for="numImages" class="form-label">Number of Images to Search: <span id="numImagesValue">{{
+                            request.form['numImages'] | default(20) }}</span></label>
+                    <input type="range" id="numImages" name="numImages" class="form-range custom-range" min="1" max="50"
+                        value="{{ request.form['numImages'] | default(20) }}" placeholder="Number of Images to Display"
+                        required style="height: 80%;">
+                    <input type="hidden" name="filename" value="{{ filename }}">
+                    <input type="hidden" name="database" value="{{ database }}">
+                </div>
+                <div class="col-md-1 mt-2">
+                    <button type="submit" class="btn btn-primary" style="height: 70%;">Update</button>
+                </div>
+            </div>
+        </form>
+
+        {% if results %}
+        <div class="container mt-5">
+            <div class="row">
+                {% for result in results %}
+                <div class="col-md-2 mb-4">
+                    <div class="card h-100 result-item">
+                        <img src="{{ result }}" class="cards bg-transparent" alt="Similar image"
+                            onclick="openModal('{{ result }}')" />
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert alert-danger mt-3">{{ error }}</div>
+        {% endif %}
+    </div>
+
+    <div class="modal fade p-3" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="border: 10px dotted black;">
+                <form action="/search" method="POST" onsubmit="showLoader()">
+                    <div class="modal-header" style="border-bottom: none;">
+                        <h5 class="modal-title bg-transparent" id="imageModalLabel">Image Preview</h5>
+                    </div>
+                    <div class="modal-body text-center" style="border-bottom: none;">
+                        <img id="modalImage" src="" class="img-fluid" alt="Expanded Image"
+                            style="max-width: none; width: 50vh; height: auto;">
+                    </div>
+                    <div class="modal-footer" style="border-top: none;">
+                        <input id="filename" type="hidden" name="filename">
+                        <input type="hidden" name="database" value="{{ database }}">
+                        <button type="submit" class="btn btn-primary mx-auto">Search This?</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid bg-blur mx-auto h-100" id="loader-holder">
+        <div class="loader bg-transparent"></div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script>
+        function openModal(imageSrc) {
+            const modalImage = document.getElementById('modalImage');
+            const filenameInput = document.getElementById('filename');
+            filenameInput.value = imageSrc;
+            modalImage.src = imageSrc; // Set the source of the modal image
+            const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+            modal.show(); // Show the modal
+        }
+    </script>
+    <script>
+        // Get the range input and the value display span
+        const numImagesInput = document.getElementById('numImages');
+        const numImagesValue = document.getElementById('numImagesValue');
+
+        // Update the displayed value when the input changes
+        numImagesInput.addEventListener('input', function () {
+            numImagesValue.textContent = this.value;
+        });
+    </script>
+    <script>
+        function showLoader() {
+            const loader = document.getElementById('loader-holder');
+            const modal = document.getElementById('imageModal');
+            loader.style.display = 'flex';
+            modal.style.display = 'none'; // Hide the modal and show the loader
+        }
+    </script>
+</body>
+
+</html>
