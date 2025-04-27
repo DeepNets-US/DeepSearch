@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepSearch</title>
+
+    <!-- Connect to Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="../static/index.css">
+    <script src="https://kit.fontawesome.com/def00d5f6e.js" crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
+    <!-- ============Favicon==================== -->
+    <link rel="apple-touch-icon" sizes="180x180" href="../static/Resources/favicon_io/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../static/Resources/favicon_io/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../static/Resources/favicon_io/favicon-16x16.png" />
+    <!-- Link to Android Chrome icons -->
+    <link rel="icon" type="image/png" sizes="192x192"
+        href="../static/Resources/favicon_io/android-chrome-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512"
+        href="../static/Resources/favicon_io/android-chrome-512x512.png" />
+
+    <link rel="manifest" href="../static/Resources/favicon_io/site.webmanifest" />
+
+</head>
+
+<body>
+
+    <!-- =======================================================================================NAVIGATION======================== -->
+
+    <nav class="navbar navbar-expand-lg bg-black">
+        <div class="container-fluid">
+            <a class="navbar-brand logo" href="/">DeepSearch</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item text-center" style="width: 30%;">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item text-center" style="width: 30%;">
+                        <a class="nav-link" href="#contact">Contact Me</a>
+                    </li>
+                    <li class="nav-item text-center" style="width: 30%;">
+                        <a class="nav-link" href="#description">Implementation Details</a>
+                    </li>
+                    <li class="nav-item text-center" style="width: 30%;">
+                        <a class="nav-link" href="#tutorial">How to Use?</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!--======================================================================================= Hero Page -->
+    <div id="header">
+        <div class="cont">
+            <div class="header-text bg-transparent">
+                <h1 class="bg-transparent ht1">Welcome!! <br>to <div class="typed-container"><span id="typed3"></span>
+                    </div>
+                </h1>
+            </div>
+        </div>
+    </div>
+    <!--======================================================================================= Upload Section (Left Column) -->
+    <section class="container fade-bottom-item" id="model">
+        <div class="row">
+            <div class="col fade-left-item">
+                <div class="upload-section h-100 d-flex flex-column justify-content-center">
+                    <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+                        <div class="mb-4 text-center">
+                            <h2 class="head2">Upload Your Image</h2>
+                        </div>
+                        {% if filename %}
+                        <div class="card mx-auto" style="width: 18rem;">
+                            <img src="{{ url_for('static', filename='uploads/' + filename) }}" alt="Uploaded Image"
+                                class="card-img-top img-fluid rounded" onclick="triggerdropzone()">
+                        </div>
+                        {% else %}
+                        <!-- ====================================================IMAGE DROPOUT====================================================== -->
+                        <div class="m-auto" id="dropZone">
+                            <p class="text-center"><i class="fa-solid fa-panorama drop-img"></i><br>Select or
+                                Drag &
+                                Drop<br> an Image here.</p>
+                            <input class="form-control form-control-lg" id="fileInput" name="image" type="file"
+                                accept="image/*" required style="display: none;">
+                        </div>
+                        <div id="previewContainer" class="card mx-auto mt-3">
+                            <img id="previewImage" src="#" alt="Preview" class="card-img-top">
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+
+            <!-- =================================================================================Configuration Section (Right Column) -->
+            <div class="col-md-4 fade-right-item">
+                <div class="search-section h-100 d-flex flex-column justify-content-center">
+                    <form id="searchForm" action="/search" method="POST" onsubmit="showLoader()">
+                        <div class="mb-3">
+                            <label for="select" class="form-label mb-2">Select Category <i
+                                    class="fa-solid fa-feather bg-transparent"></i></label>
+                            <div class="custom-select-wrapper">
+                                <select id="select" name="database" class="form-select custom-select" required
+                                    onchange="fetchClassNames()">
+                                    <option value="" disabled selected>Choose a Category</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category }}">{{ category }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="numImages" class="form-label">Number of Images to Search: <span
+                                    id="numImagesValue">10</span></label>
+                            <input type="range" id="numImages" name="numImages" class="form-range custom-range" min="1"
+                                max="50" value="10" required>
+                        </div>
+                        <input type="hidden" name="filename" value="{{ filename }}">
+                        <input type="hidden" name="database" value="{{ database }}">
+                        <button type="submit" class="btn btn-primary w-100">Show Results <i
+                                class="fa-solid fa-bolt bg-transparent"></i></button>
+                        <a class="btn btn-primary w-100" href="/#model">Reset <i
+                                class="fa-solid fa-arrows-rotate bg-transparent"></i></a>
+                    </form>
+
+                    <p id="classNamesParagraph" class="mt-3" style="display:none;">Model only supports: <span
+                            id="classNamesList" class="bg-transparent">{{
+                            class_names_list }}</span></p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- ===================================================================================Tutorial============================================ -->
+    <div id="tutorial">
+        <div class="tutorial fade-bottom-item">
+            <video controls class="fade-left-item">
+                <source src="../static/Resources/vid.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+    <!-- ===================================================================================Contact============================================ -->
+    <div id="contact">
+        <!-- Utkarsh ====================================================== -->
+        <div class="e-card playing fade-bottom-item">
+            <div class="image"></div>
+            <div class="wave1"></div>
+            <div class="wave1"></div>
+            <div class="wave1"></div>
+
+
+            <div class="infotop bg-transparent">
+                <h1 class="infoh1 bg-transparent fade-left-item">Utkarsh Saxena</h1>
+                <div class="name bg-transparent fade-left-item">AIML <i
+                        class="name1 fa-solid fa-robot bg-transparent"></i> Engineer</div>
+                <div class="flinks bg-transparent">
+                    <a class="bg-transparent fade-left-item" href="https://www.kaggle.com/utkarshsaxenadn"
+                        target="blank"><i class="links fa-brands fa-kaggle bg-transparent"></i></a>
+                    <a class="bg-transparent fade-left-item" href="mailto:deepnets722@gmail.com" target="blank"><i
+                            class="links fa-solid fa-envelope-open bg-transparent"></i></a>
+                    <a class="bg-transparent fade-left-item" href="https://github.com/DeepNets-US" target="blank"><i
+                            class="links fa-brands fa-github bg-transparent"></i></a>
+                    <a class="bg-transparent fade-left-item" href="https://www.linkedin.com/in/utkarsh-saxena-deepnets/"
+                        target="blank"><i class="links fa-brands fa-linkedin-in bg-transparent"></i></a>
+                    <a class="bg-transparent fade-left-item" href="https://linktr.ee/UtkarshSaxena_DeepNets"
+                        target="blank"><i class="links fa-solid fa-link bg-transparent"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ===================================================================================Project details============================================ -->
+    <div id="description">
+
+        <!-- Content Based Image Retrival -->
+        <div class="des fade-bottom-item">
+            <div class="bg-transparent card-name fade-left-item">Animal-CBIR</div>
+            <div class="img-cont img-cont1"></div>
+            <div class="bg-transparent card-name-2">
+                This notebook is responsible for creating the feature extractor and the classifier model for the animal
+                species dataset attached with it. In this notebook, the feature extractor is built, an Annoy index is
+                created, and all components are combined to form a complete working pipeline for a Content-Based Image
+                Retrieval (CBIR) system. Essentially, it functions like an image search engine, allowing you to search
+                for images within the animal species database.
+
+                <ul class="bg-transparent" style="list-style-type: none; padding-left: 0;">
+                    <li class="bg-transparent">
+                        <a href="https://www.kaggle.com/code/utkarshsaxenadn/animal-species-cbir" target="_blank"
+                            class="author-left bg-transparent">
+                            🚀 Dive into the Full Notebook
+                        </a>
+                    </li>
+                    <li class="bg-transparent">
+                        <a href="https://huggingface.co/spaces/DeepNets/Animal-DeepSearch" target="_blank"
+                            class="author-left bg-transparent">
+                            🧠 Try the Model Live on HuggingFace
+                        </a>
+                    </li>
+                    <li class="bg-transparent">
+                        <a href="https://www.kaggle.com/datasets/utkarshsaxenadn/animal-image-classification-dataset"
+                            target="_blank" class="author-left bg-transparent">
+                            📂 Explore the Dataset Behind It
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="author bg-transparent">- DeepNets</div>
+        </div>
+
+        <!-- Fast Food Detail -->
+        <div class="des fade-bottom-item">
+            <div class="bg-transparent card-name fade-left-item">Fast Food-CBIR</div>
+            <div class="img-cont img-cont-ff"></div>
+            <div class="bg-transparent card-name-2">
+                This notebook is responsible for creating the feature extractor and the classifier model for the Fast
+                Food dataset attached with it. In this notebook, the feature extractor is built, an Annoy index is
+                created, and all components are combined to form a complete working pipeline for a Content-Based Image
+                Retrieval (CBIR) system. Essentially, it functions like an image search engine, allowing you to search
+                for images within the Fast Food database.
+
+                <ul class="bg-transparent" style="list-style-type: none; padding-left: 0;">
+                    <li class="bg-transparent">
+                        <a href="https://www.kaggle.com/code/utkarshsaxenadn/fast-food-classification-cbir"
+                            target="_blank" class="author-left bg-transparent">
+                            🚀 Dive into the Full Notebook
+                        </a>
+                    </li>
+                    <li class="bg-transparent">
+                        <a href="https://huggingface.co/spaces/DeepNets/FastFood-DeepSearch" target="_blank"
+                            class="author-left bg-transparent">
+                            🧠 Try the Model Live on HuggingFace
+                        </a>
+                    </li>
+                    <li class="bg-transparent">
+                        <a href="https://www.kaggle.com/datasets/utkarshsaxenadn/fast-food-classification-dataset"
+                            target="_blank" class="author-left bg-transparent">
+                            📂 Explore the Dataset Behind It
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="author bg-transparent">- DeepNets</div>
+        </div>
+
+        <!-- Flower Detail -->
+        <div class="des fade-bottom-item">
+            <div class="bg-transparent card-name fade-left-item">Flower-CBIR</div>
+            <div class="img-cont img-cont-fl"></div>
+            <div class="bg-transparent card-name-2">
+                This notebook is responsible for creating the feature extractor and the classifier model for the Flower
+                dataset attached with it. In this notebook, the feature extractor is built, an Annoy index is created,
+                and all components are combined to form a complete working pipeline for a Content-Based Image Retrieval
+                (CBIR) system. Essentially, it functions like an image search engine, allowing you to search
+                for images within the Flower database.
+
+                <ul class="bg-transparent" style="list-style-type: none; padding-left: 0;">
+                    <li class="bg-transparent">
+                        <a href="https://www.kaggle.com/code/utkarshsaxenadn/flower-classification-cbir" target="_blank"
+                            class="author-left bg-transparent">
+                            🚀 Dive into the Full Notebook
+                        </a>
+                    </li>
+                    <li class="bg-transparent">
+                        <a href="https://huggingface.co/spaces/DeepNets/Flower-DeepSearch" target="_blank"
+                            class="author-left bg-transparent">
+                            🧠 Try the Model Live on HuggingFace
+                        </a>
+                    </li>
+                    <li class="bg-transparent">
+                        <a href="https://www.kaggle.com/datasets/utkarshsaxenadn/flower-classification-5-classes-roselilyetc"
+                            target="_blank" class="author-left bg-transparent">
+                            📂 Explore the Dataset Behind It
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="author bg-transparent">- DeepNets</div>
+        </div>
+
+        <!-- Fruit Detail -->
+        <div class="des fade-bottom-item">
+            <div class="bg-transparent card-name fade-left-item">Fruit-CBIR</div>
+            <div class="img-cont img-cont-fr"></div>
+            <div class="bg-transparent card-name-2">
+                This notebook is responsible for creating the feature extractor and the classifier model for the Fruit
+                dataset attached with it. In this notebook, the feature extractor is built, an Annoy index is created,
+                and all components are combined to form a complete working pipeline for a Content-Based Image Retrieval
+                (CBIR) system. Essentially, it functions like an image search engine, allowing you to search
+                for images within the Fruit database.
+
+                <ul class="bg-transparent" style="list-style-type: none; padding-left: 0;">
+                    <li class="bg-transparent">
+                        <a href="https://www.kaggle.com/code/utkarshsaxenadn/fruit-classification-cbir" target="_blank"
+                            class="author-left bg-transparent">
+                            🚀 Dive into the Full Notebook
+                        </a>
+                    </li>
+                    <li class="bg-transparent">
+                        <a href="https://huggingface.co/spaces/DeepNets/Fruit-DeepSearch" target="_blank"
+                            class="author-left bg-transparent">
+                            🧠 Try the Model Live on HuggingFace
+                        </a>
+                    </li>
+                    <li class="bg-transparent">
+                        <a href="https://www.kaggle.com/datasets/utkarshsaxenadn/fruits-classification" target="_blank"
+                            class="author-left bg-transparent">
+                            📂 Explore the Dataset Behind It
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="author bg-transparent">- DeepNets</div>
+        </div>
+
+        <!-- Landscape Detail -->
+        <div class="des fade-bottom-item">
+            <div class="bg-transparent card-name fade-left-item">Landscape-CBIR</div>
+            <div class="img-cont img-cont-ls"></div>
+            <div class="bg-transparent card-name-2">
+                This notebook is responsible for creating the feature extractor and the classifier model for the
+                Landscape
+                dataset attached with it. In this notebook, the feature extractor is built, an Annoy index is created,
+                and all components are combined to form a complete working pipeline for a Content-Based Image Retrieval
+                (CBIR) system. Essentially, it functions like an image search engine, allowing you to search
+                for images within the Landscape database.
+
+                <ul class="bg-transparent" style="list-style-type: none; padding-left: 0;">
+                    <li class="bg-transparent">
+                        <a href="https://www.kaggle.com/code/utkarshsaxenadn/landscape-recognition-cbir" target="_blank"
+                            class="author-left bg-transparent">
+                            🚀 Dive into the Full Notebook
+                        </a>
+                    </li>
+                    <li class="bg-transparent">
+                        <a href="https://huggingface.co/spaces/DeepNets/Landscape-DeepSearch" target="_blank"
+                            class="author-left bg-transparent">
+                            🧠 Try the Model Live on HuggingFace
+                        </a>
+                    </li>
+                    <li class="bg-transparent">
+                        <a href="https://www.kaggle.com/datasets/utkarshsaxenadn/landscape-recognition-image-dataset-12k-images"
+                            target="_blank" class="author-left bg-transparent">
+                            📂 Explore the Dataset Behind It
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="author bg-transparent">- DeepNets</div>
+        </div>
+
+        <!-- Shoes Detail -->
+        <div class="des fade-bottom-item">
+            <div class="bg-transparent card-name fade-left-item">Shoes-CBIR</div>
+            <div class="img-cont img-cont-sh"></div>
+            <div class="bg-transparent card-name-2">
+                This notebook is responsible for creating the feature extractor and the classifier model for the
+                Shoes dataset attached with it. In this notebook, the feature extractor is built, an Annoy index is
+                created, and all components are combined to form a complete working pipeline for a Content-Based Image
+                Retrieval (CBIR) system. Essentially, it functions like an image search engine, allowing you to search
+                for images within the Shoes database.
+
+                <ul class="bg-transparent" style="list-style-type: none; padding-left: 0;">
+                    <li class="bg-transparent">
+                        <a href="https://www.kaggle.com/code/utkarshsaxenadn/shoes-classification-cbir" target="_blank"
+                            class="author-left bg-transparent">
+                            🚀 Dive into the Full Notebook
+                        </a>
+                    </li>
+                    <li class="bg-transparent">
+                        <a href="https://huggingface.co/spaces/DeepNets/Shoes-DeepSearch" target="_blank"
+                            class="author-left bg-transparent">
+                            🧠 Try the Model Live on HuggingFace
+                        </a>
+                    </li>
+                    <li class="bg-transparent">
+                        <a href="https://www.kaggle.com/datasets/utkarshsaxenadn/shoes-classification-dataset-13k-images"
+                            target="_blank" class="author-left bg-transparent">
+                            📂 Explore the Dataset Behind It
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="author bg-transparent">- DeepNets</div>
+        </div>
+
+        <!--  -->
+    </div>
+    <!-- ===================================================================================Loader============================================ -->
+
+    <div class="container-fluid bg-blur mx-auto h-100" id="loader-holder">
+        <div class="loader bg-transparent"></div>
+    </div>
+
+    <!-- ===================================================================================Scripts============================================ -->
+
+    <!-- Connect to Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadForm = document.getElementById('uploadForm');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+
+        // Handle click on drop zone
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Handle file selection
+        fileInput.addEventListener('change', function (e) {
+            if (this.files && this.files[0]) {
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    previewImage.src = e.target.result;
+                    dropZone.style.display = 'none';
+                    previewContainer.style.display = 'block';
+                }
+                reader.readAsDataURL(this.files[0]);
+
+                // Auto-submit the form
+                uploadForm.submit();
+            }
+        });
+
+        // Handle drag and drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = '#e9ecef';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.backgroundColor = '';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = '';
+
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                // Set the file to the input
+                fileInput.files = e.dataTransfer.files;
+
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    previewImage.src = e.target.result;
+                    dropZone.style.display = 'none';
+                    previewContainer.style.display = 'block';
+                }
+                reader.readAsDataURL(fileInput.files[0]);
+
+                // Auto-submit the form
+                uploadForm.submit();
+            }
+        });
+
+        function fetchClassNames() {
+            const database = document.getElementById('select').value;
+            fetch('/get_class_names', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ database: database }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const classNamesParagraph = document.getElementById('classNamesParagraph');
+                    const classNamesList = document.getElementById('classNamesList');
+                    classNamesList.innerText = data.class_names_list.join(', ');
+                    classNamesParagraph.style.display = 'block';
+                });
+        }
+
+        function triggerdropzone() {
+            dropZone.style.display = 'block';
+            previewContainer.style.display = 'none';
+            previewImage.src = '';
+            fileInput.value = '';
+            uploadForm.reset();
+        }
+    </script>
+
+    <script>
+        const numImages = document.getElementById('numImages');
+        const numImagesValue = document.getElementById('numImagesValue');
+
+        // Update value display when slider moves
+        numImages.addEventListener('input', function () {
+            numImagesValue.textContent = this.value;
+        });
+
+        // Initial update when page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            numImagesValue.textContent = numImages.value;
+        });
+    </script>
+
+    <!-- ================================================================TYPED JS SCRIPTS -->
+    <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+    <script>
+        // Initialize Typed.js
+        var typed3 = new Typed('#typed3', {
+            strings: ['DeepSearch.', 'By DeepNets.'],
+            typeSpeed: 40,
+            cursorChar: '•',
+            backSpeed: 40,
+            smartBackspace: true,
+            loop: true
+        });
+
+        // Move the cursor inside the container
+        const container = document.querySelector('.typed-container');
+        const cursor = document.querySelector('.typed-cursor');
+        if (cursor) {
+            container.appendChild(cursor);
+        }
+    </script>
+    <!-- ==========================================================Containers Animation========================================================== -->
+
+    <script>
+        document.addEventListener("scroll", function () {
+            // Select all elements that should fade in
+            var fadeElements = document.querySelectorAll(
+                ".fade-left-item, .fade-right-item, .fade-bottom-item"
+            );
+
+            fadeElements.forEach(function (element) {
+                var rect = element.getBoundingClientRect();
+
+                // Check if the element is in the viewport (even partially)
+                if (rect.top < window.innerHeight && rect.bottom >= 0) {
+                    element.classList.add("active");
+                } else {
+                    // Remove the active class if you want the animation to re-trigger on scroll
+                    element.classList.remove("active");
+                }
+            });
+        });
+    </script>
+    <script>
+        function showLoader() {
+            const loader = document.getElementById('loader-holder');
+            loader.style.display = 'flex';
+        }
+    </script>
+
+</body>
+
+</html>
