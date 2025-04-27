@@ -1,0 +1,46 @@
+{
+  "Animal": [
+    "Beetle",
+    "Butterfly",
+    "Cat",
+    "Cow",
+    "Dog",
+    "Elephant",
+    "Gorilla",
+    "Hippo",
+    "Lizard",
+    "Monkey",
+    "Mouse",
+    "Panda",
+    "Spider",
+    "Tiger",
+    "Zebra"
+  ],
+  "FastFood": [
+    "Baked Potato",
+    "Burger",
+    "Crispy Chicken",
+    "Donut",
+    "Fries",
+    "Hot Dog",
+    "Pizza",
+    "Sandwich",
+    "Taco",
+    "Taquito"
+  ],
+  "Flower": [
+    "Aster",
+    "Daisy",
+    "Iris",
+    "Lavender",
+    "Lily",
+    "Marigold",
+    "Orchid",
+    "Poppy",
+    "Rose",
+    "Sunflower"
+  ],
+  "Fruit": ["Apple", "Banana", "Grape", "Mango", "Strawberry"],
+  "Landscape": ["Coast", "Desert", "Forest", "Glacier", "Mountain"],
+  "Shoes": ["Ballet Flat", "Boat", "Brogue", "Clog", "Sneaker"]
+}
