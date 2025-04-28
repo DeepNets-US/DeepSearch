@@ -1,1 +1,4 @@
-pandas==2.2.1
+Flask==3.1.0
+Jinja2==3.1.6
+gradio==5.27.0
+werkzeug==3.1.3
